@@ -1,5 +1,10 @@
 # `blob-polyfill` CHANGELOG
 
+## v6.0.20211015
+* [Blob.js] Check object class names when determining Object types (@coclauso)
+* [Blob.js] Reduce redundancies in getting class names and prototype checks (@bjornstar)
+* [test] Add a test for round tripping data in ArrayBuffers (@coclauso)
+
 ## v5.0.20210201
 * [Blob.js] Blob.arrayBuffer() should return a promise that resolves with an ArrayBuffer (@bjornstar)
 * [test] Add a test for Blob.arrayBuffer (@bjornstar)

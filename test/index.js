@@ -119,15 +119,15 @@ describe("blob-polyfill", function () {
 
 
 function stringToArrayBuffer(string) {
-	const buf = new ArrayBuffer(string.length * 2); // 2 bytes for each char
-	const bufView = new Uint16Array(buf);
-	for (let i = 0, strLen = string.length; i < strLen; i++) {
+	var buf = new ArrayBuffer(string.length * 2); // 2 bytes for each char
+	var bufView = new Uint16Array(buf);
+	for (var i = 0; i < string.length; i+= 1) {
 		bufView[i] = string.charCodeAt(i);
 	}
 	return buf;
 }
 
 function arrayBufferToString(buffer) {
-	const array = new Uint16Array(buffer);
+	var array = new Uint16Array(buffer);
 	return String.fromCharCode.apply(null, array);
 }

@@ -40,7 +40,6 @@
 		var strTag = global.Symbol && global.Symbol.toStringTag;
 		var blobSupported = false;
 		var blobSupportsArrayBufferView = false;
-		var arrayBufferSupported = !!global.ArrayBuffer;
 		var blobBuilderSupported = BlobBuilder
 			&& BlobBuilder.prototype.append
 			&& BlobBuilder.prototype.getBlob;
@@ -255,9 +254,6 @@
 			: stringDecode;
 
 		function FakeBlobBuilder () {
-			function isDataView (obj) {
-				return obj && Object.prototype.isPrototypeOf.call(DataView.prototype, obj);
-			}
 			function bufferClone (buf) {
 				var view = new Array(buf.byteLength);
 				var array = new Uint8Array(buf);
@@ -307,22 +303,37 @@
 				return new c();
 			};
 
-			if (arrayBufferSupported) {
-				var viewClasses = [
-					"[object Int8Array]",
-					"[object Uint8Array]",
-					"[object Uint8ClampedArray]",
-					"[object Int16Array]",
-					"[object Uint16Array]",
-					"[object Int32Array]",
-					"[object Uint32Array]",
-					"[object Float32Array]",
-					"[object Float64Array]"
-				];
+			function getObjectTypeName (o) {
+				return Object.prototype.toString.call(o).slice(8, -1);
+			}
 
-				var isArrayBufferView = ArrayBuffer.isView || function (obj) {
-					return obj && viewClasses.indexOf(Object.prototype.toString.call(obj)) > -1;
-				};
+			function isPrototypeOf(c, o) {
+				return typeof c === "object" && Object.prototype.isPrototypeOf.call(c.prototype, o);
+			}
+
+			function isDataView (o) {
+				return getObjectTypeName(o) === "DataView" || isPrototypeOf(global.DataView, o);
+			}
+
+			var arrayBufferClassNames = [
+				"Int8Array",
+				"Uint8Array",
+				"Uint8ClampedArray",
+				"Int16Array",
+				"Uint16Array",
+				"Int32Array",
+				"Uint32Array",
+				"Float32Array",
+				"Float64Array",
+				"ArrayBuffer"
+			];
+
+			function includes(a, v) {
+				return a.indexOf(v) !== -1;
+			}
+
+			function isArrayBuffer(o) {
+				return includes(arrayBufferClassNames, getObjectTypeName(o)) || isPrototypeOf(global.ArrayBuffer, o);
 			}
 
 			function concatTypedarrays (chunks) {
@@ -352,14 +363,10 @@
 						chunks[i] = chunk._buffer;
 					} else if (typeof chunk === "string") {
 						chunks[i] = textEncode(chunk);
-					} else if (
-						arrayBufferSupported && (
-							Object.prototype.isPrototypeOf.call(ArrayBuffer.prototype, chunk)
-							|| isArrayBufferView(chunk)
-							|| toString.call(chunk) === "[object ArrayBuffer]")) {
-						chunks[i] = bufferClone(chunk);
-					} else if (arrayBufferSupported && isDataView(chunk)) {
+					} else if (isDataView(chunk)) {
 						chunks[i] = bufferClone(chunk.buffer);
+					} else if (isArrayBuffer(chunk)) {
+						chunks[i] = bufferClone(chunk);
 					} else {
 						chunks[i] = textEncode(String(chunk));
 					}

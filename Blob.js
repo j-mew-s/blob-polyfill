@@ -593,7 +593,7 @@ function array2base64 (input) {
 		FileReader.prototype.readAsArrayBuffer = function (blob) {
 			_read(this, blob, "readAsText");
 			// return ArrayBuffer when possible
-			this.result = (blob._buffer.buffer || blob._buffer).slice();
+			this.result = (blob._buffer && blob._buffer.buffer).slice();
 		};
 
 		FileReader.prototype.abort = function () {};
